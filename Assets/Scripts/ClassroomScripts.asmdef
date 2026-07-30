@@ -1,0 +1,17 @@
+{
+    "name": "ClassroomScripts",
+    "rootNamespace": "",
+    "references": [
+        "GUID:fd4abe4ffe74ef1448afe15c6cb36bb7",
+        "GUID:60ed2ffa74bfb064b98412076f9659a3"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
