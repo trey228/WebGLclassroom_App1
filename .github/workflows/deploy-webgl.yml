@@ -1,0 +1,71 @@
+name: Deploy WebGL to Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'WebGL/**'
+      - '.github/workflows/deploy-webgl.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      # lfs: true is the critical line. Without it the checkout contains
+      # ~130-byte pointer text files and the published build is dead.
+      - name: Checkout (resolving Git LFS)
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Force-resolve any remaining LFS objects
+        run: git lfs pull
+
+      # Guard: if any pointer file survived into WebGL/, fail loudly here
+      # rather than shipping a site that 404s inside the Unity loader.
+      - name: Fail if LFS pointers survived
+        run: |
+          if grep -rls "git-lfs.github.com/spec" WebGL/ 2>/dev/null | grep -q .; then
+            echo "::error::Unresolved Git LFS pointer files found in WebGL/."
+            grep -rls "git-lfs.github.com/spec" WebGL/
+            exit 1
+          fi
+          echo "No LFS pointers in WebGL/ - safe to publish."
+
+      - name: Sanity-check the build output
+        run: |
+          test -f WebGL/index.html || { echo "::error::WebGL/index.html missing"; exit 1; }
+          echo "--- Published file sizes ---"
+          find WebGL -type f -exec du -h {} + | sort -rh | head -20
+          echo "--- Total ---"
+          du -sh WebGL
+
+      # Stops Jekyll from mangling the Unity template files.
+      - name: Add .nojekyll
+        run: touch WebGL/.nojekyll
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: WebGL
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

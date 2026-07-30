@@ -1,0 +1,61 @@
+# =====================================================================
+# Git LFS configuration - ClassroomXR
+# =====================================================================
+# LFS is used for LARGE SOURCE ASSETS (models, textures, audio, blend
+# files). It is deliberately NOT used for the WebGL build output in
+# WebGL/, because GitHub Pages cannot resolve LFS pointers on its own -
+# see the deploy workflow, which resolves them at build time.
+# =====================================================================
+
+# ---- 3D models ----
+*.fbx    filter=lfs diff=lfs merge=lfs -text
+*.FBX    filter=lfs diff=lfs merge=lfs -text
+*.blend  filter=lfs diff=lfs merge=lfs -text
+*.blend1 filter=lfs diff=lfs merge=lfs -text
+*.obj    filter=lfs diff=lfs merge=lfs -text
+*.dae    filter=lfs diff=lfs merge=lfs -text
+*.glb    filter=lfs diff=lfs merge=lfs -text
+*.gltf   filter=lfs diff=lfs merge=lfs -text
+
+# ---- Textures / images ----
+*.psd  filter=lfs diff=lfs merge=lfs -text
+*.tif  filter=lfs diff=lfs merge=lfs -text
+*.tiff filter=lfs diff=lfs merge=lfs -text
+*.tga  filter=lfs diff=lfs merge=lfs -text
+*.exr  filter=lfs diff=lfs merge=lfs -text
+*.hdr  filter=lfs diff=lfs merge=lfs -text
+*.png  filter=lfs diff=lfs merge=lfs -text
+*.jpg  filter=lfs diff=lfs merge=lfs -text
+*.jpeg filter=lfs diff=lfs merge=lfs -text
+
+# ---- Audio ----
+*.wav filter=lfs diff=lfs merge=lfs -text
+*.mp3 filter=lfs diff=lfs merge=lfs -text
+*.ogg filter=lfs diff=lfs merge=lfs -text
+
+# ---- Unity binary asset types ----
+*.cubemap filter=lfs diff=lfs merge=lfs -text
+*.unitypackage filter=lfs diff=lfs merge=lfs -text
+
+# ---- Force Unity text assets to stay diffable (NOT LFS) ----
+*.cs        text diff=csharp
+*.shader    text
+*.hlsl      text
+*.cginc     text
+*.unity     text
+*.prefab    text
+*.mat       text
+*.asset     text
+*.meta      text
+*.json      text
+*.md        text
+
+# =====================================================================
+# If your compressed WebGL build still exceeds 100 MB for a single file,
+# uncomment the lines below to LFS-track it. The deploy workflow already
+# resolves LFS before publishing, so Pages will still work - but be aware
+# this consumes LFS bandwidth quota on EVERY deploy.
+# =====================================================================
+# WebGL/Build/*.data       filter=lfs diff=lfs merge=lfs -text
+# WebGL/Build/*.wasm       filter=lfs diff=lfs merge=lfs -text
+# WebGL/Build/*.unityweb   filter=lfs diff=lfs merge=lfs -text

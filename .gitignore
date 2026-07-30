@@ -1,0 +1,50 @@
+# =====================================================================
+# ClassroomXR .gitignore
+# Note the LEADING SLASHES on the Build rules below. They anchor the rule
+# to the repo root, so T:\Unity\Classroom_XR\Build is ignored but
+# T:\Unity\Classroom_XR\WebGL\Build (the published output) is NOT.
+# Without the slash, git ignores every folder named Build at any depth.
+# =====================================================================
+
+# ---- Unity generated folders (NEVER commit these) ----
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+
+# ---- Visual Studio / Rider / IDE ----
+.vs/
+.idea/
+.vscode/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# ---- OS cruft ----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- Unity misc ----
+sysinfo.txt
+crashlytics-build.properties
+/[Aa]ssets/AssetStoreTools*
+
+# ---- Blender working files ----
+*.blend1
+*.blend2
