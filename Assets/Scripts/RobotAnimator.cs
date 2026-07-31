@@ -1,7 +1,16 @@
 using UnityEngine;
 
 /// <summary>
-/// RobotAnimator v6.1 - procedural walk (legs) + VR arm IK with a real elbow.
+/// RobotAnimator v6.2 - procedural walk (legs) + VR arm IK with a real elbow.
+///
+/// v6.2 changes (elbow anchoring):
+///   - POLE NOW HANGS THE ELBOW DOWN. v6.1's pole was built from "back" plus a
+///     little "out", with no downward component, so the elbow floated at
+///     shoulder height and swung through a wide arc as the hand moved - it read
+///     as the elbow leading the gesture rather than trailing it. The pole is
+///     now a weighted blend of down (dominant), back and out, so the elbow
+///     rides low against the ribs and barely travels. Tune with the Pole*
+///     constants below.
 ///
 /// v6.1 changes (axis-convention independence):
 ///   - REST AXES ARE MEASURED, NOT ASSUMED. v6 and earlier assumed each limb
@@ -67,9 +76,21 @@ public class RobotAnimator : MonoBehaviour
     // const on purpose. New serialized fields deserialize as 0 on existing
     // component instances and silently break the thing they were added to fix.
 
-    /// <summary>How far the elbow is pushed away from the body, relative to how
-    /// far it is pushed backward. 0 = elbow points straight back.</summary>
-    private const float PoleOutward = 0.35f;
+    // Pole weights. The elbow is pushed along a blend of down, back and out.
+    // DOWN dominates on purpose: a real elbow hangs against the ribs and barely
+    // travels, while the forearm does most of the work. A pole built only from
+    // "back" leaves the elbow floating at shoulder height, swinging through a
+    // wide arc as the hand moves - which reads as the elbow leading the motion.
+
+    /// <summary>Elbow drop. Raise for a lower, more anchored elbow.</summary>
+    private const float PoleDownward = 1.0f;
+
+    /// <summary>Elbow set-back behind the body plane.</summary>
+    private const float PoleBackward = 0.7f;
+
+    /// <summary>How far the elbow is pushed away from the body. 0 = elbow stays
+    /// in the body's centre plane.</summary>
+    private const float PoleOutward = 0.30f;
 
     /// <summary>Keeps the solved distance clear of the fully-folded and
     /// fully-extended singularities.</summary>
@@ -167,7 +188,7 @@ public class RobotAnimator : MonoBehaviour
         if (leftFore == null || rightFore == null || leftHand == null || rightHand == null)
         {
             hasIK = false;
-            Debug.LogWarning("[RobotAnimator] v6.1: no Forearm/Hand chain found under the arms - "
+            Debug.LogWarning("[RobotAnimator] v6.2: no Forearm/Hand chain found under the arms - "
                 + "falling back to single-bone aim. Re-export Avatar_Default.fbx with "
                 + "ArmL > ForearmL > HandL (and R) to enable the elbow.");
             return;
@@ -189,14 +210,14 @@ public class RobotAnimator : MonoBehaviour
 
         if (!hasIK)
         {
-            Debug.LogWarning("[RobotAnimator] v6.1: arm bone lengths measured near zero "
+            Debug.LogWarning("[RobotAnimator] v6.2: arm bone lengths measured near zero "
                 + "(L " + leftUpperLen.ToString("F3") + "/" + leftLowerLen.ToString("F3")
                 + ", R " + rightUpperLen.ToString("F3") + "/" + rightLowerLen.ToString("F3")
                 + ") - falling back to single-bone aim.");
         }
         else
         {
-            Debug.Log("[RobotAnimator] v6.1 two-bone IK active. Bone lengths L "
+            Debug.Log("[RobotAnimator] v6.2 two-bone IK active. Bone lengths L "
                 + leftUpperLen.ToString("F3") + "/" + leftLowerLen.ToString("F3")
                 + ", R " + rightUpperLen.ToString("F3") + "/" + rightLowerLen.ToString("F3")
                 + " | rest axis arm " + leftArmAxis.ToString("F2")
@@ -423,7 +444,9 @@ public class RobotAnimator : MonoBehaviour
         // Pole: elbow rides backward and outward from the body. Built as an
         // orthonormal basis rather than a cross-product rotation, so there is no
         // handedness sign to get wrong.
-        Vector3 poleDir = (bodyBack + bodyRight * (sideSign * PoleOutward)).normalized;
+        Vector3 poleDir = (bodyDown  * PoleDownward
+                         + bodyBack  * PoleBackward
+                         + bodyRight * (sideSign * PoleOutward)).normalized;
         Vector3 pPerp = poleDir - dir * Vector3.Dot(poleDir, dir);
         if (pPerp.sqrMagnitude < 0.000001f)
         {
